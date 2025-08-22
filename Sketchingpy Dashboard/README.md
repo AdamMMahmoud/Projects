@@ -1,6 +1,6 @@
 # Stack Overflow 2024 Developer Survey Dashboard
 
-This project uses the **2024 Stack Overflow Developer Survey** data to build an interactive dashboard in [Sketchingpy](https://sketchingpy.com/). The dashboard explores how different education levels affect **salary** and **technology use** across industries.
+This project uses the **2024 Stack Overflow Developer Survey** data to build an interactive dashboard in [Sketchingpy](https://editor.sketchingpy.org/). The dashboard explores how different education levels affect **salary** and **technology use** across industries.
 
 ---
 
