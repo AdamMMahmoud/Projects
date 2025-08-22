@@ -17,10 +17,19 @@ This project uses the **2024 Stack Overflow Developer Survey** data to build an 
 
 ---
 
+## How to Open the Interactive Dashboard
+1. Download the file **`Sketchingpy Dashboard Project.skprj`** from this repository.  
+2. Go to the [Sketchingpy Editor](https://editor.sketchingpy.org/).  
+3. In the editor, click **Open Project**.  
+4. Upload the `.skprj` file you downloaded.  
+5. Click **Run** to launch and interact with the dashboard.  
+
+---
+
 ## Repository Contents
 - `Final Project Data Preprocessing (1).ipynb` — Jupyter notebook for data cleaning and preprocessing.  
 - `stack_overflow_survey2.csv` — Preprocessed dataset used in the dashboard.  
-- `Sketchingpy Dashboard Project.skprj` — Sketchingpy project file. Navigate to [Sketchingpy](https://editor.sketchingpy.org/), click "Open Project," upload this file, and "Run" the code to use the interactive dashboard.  
+- `Sketchingpy Dashboard Project.skprj` — Sketchingpy project file.  
 - `Sketchingpy Dashboard Code.py` — Python script version of the Sketchingpy code (for easier viewing in GitHub).  
 - `Sketchingpy Project Demo.gif` — Short demo of the interactive dashboard.  
 
