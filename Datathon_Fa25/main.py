@@ -344,13 +344,24 @@ def build_pipeline(state_pref, residency_pref, family_earnings, desired_degree, 
     return ranked
 
 
-def display_output(df, n=20):
+def display_output(df, n=None):
     df = df.copy()
+
     df["msi_type"] = df.apply(
         lambda row: next((cat.upper() for cat in MSI_CATEGORIES if row.get(cat, 0) == 1), "None"),
         axis=1
     )
-    df = df.sort_values("similarity_score", ascending=False).reset_index(drop=True)
+
+    # format similarity as %
     df["similarity_score"] = (df["similarity_score"] * 100).round(1).astype(str) + "%"
-    return df[["similarity_score","roi","institution_name","state","city","msi_type","coa_in_state","coa_out_state","admissions_url",
-               "total_enrollment","admit_rate"]].head(n)
+
+    # sort by ROI descending
+    df = df.sort_values("roi", ascending=False).reset_index(drop=True)
+
+    cols = [
+        "similarity_score","roi","institution_name","state","city","msi_type",
+        "coa_in_state","coa_out_state","admissions_url",
+        "total_enrollment","admit_rate"
+    ]
+
+    return df[cols] if n is None else df[cols].head(n)
