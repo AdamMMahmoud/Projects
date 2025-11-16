@@ -2,6 +2,9 @@ import duckdb
 import pandas as pd
 import numpy as np
 import re
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+import plotly.express as px
 
 res_path = "Datathon_Fa25/data/College_Results.csv"
 aff_path = "Datathon_Fa25/data/Affordability_Gap.csv"
@@ -276,7 +279,60 @@ def compute_roi(df, state_pref, residency_pref):
     d["roi"] = d["roi"].fillna(-99.9)
     return d
 
+def build_pca_plot(df, user_prefs):
+    numeric_features = ["total_enrollment","admit_rate","student_faculty_ratio"]
 
+    df_numeric = df[numeric_features].astype(float)
+    valid_mask = df_numeric.notna().all(axis=1)
+
+    if valid_mask.sum() < 3:
+        fig = px.scatter(title="Not enough numeric data for PCA visualization.")
+        return fig
+
+    X = df_numeric[valid_mask]
+
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    pca = PCA(n_components=2)
+    coords = pca.fit_transform(X_scaled)
+
+    df_plot = df.copy()
+    df_plot["PC1"] = np.nan
+    df_plot["PC2"] = np.nan
+    df_plot.loc[valid_mask, "PC1"] = coords[:,0]
+    df_plot.loc[valid_mask, "PC2"] = coords[:,1]
+
+    user_vec = pd.DataFrame([user_prefs])[numeric_features].astype(float)
+
+    for col in numeric_features:
+        if np.isnan(user_vec[col].values[0]):
+            user_vec[col] = X[col].median()
+
+    user_scaled = scaler.transform(user_vec)
+    user_coord = pca.transform(user_scaled)[0]
+
+    fig = px.scatter(
+        df_plot,
+        x="PC1",
+        y="PC2",
+        hover_name="institution_name",
+        color="similarity_score",
+        color_continuous_scale="Viridis",
+        title="College Landscape (PCA Projection)"
+    )
+
+    fig.add_scatter(
+        x=[user_coord[0]],
+        y=[user_coord[1]],
+        mode="markers+text",
+        marker=dict(size=18, symbol="star", color="red"),
+        text=["YOU"],
+        textposition="top center",
+        name="Your Preference"
+    )
+
+    return fig
 
 def build_pipeline(state_pref, residency_pref, family_earnings, desired_degree, user_prefs, user_weights):
     aff = load_affordability_data(aff_path)
