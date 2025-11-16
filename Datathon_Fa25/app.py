@@ -3,254 +3,124 @@ import pandas as pd
 from main import (
     build_pipeline,
     display_output,
-    MSI_CATEGORIES,
-    DEGREE_ORDER
+    MSI_CATEGORIES
 )
 
-# ---------------------------------------------------------
-# PAGE CONFIG
-# ---------------------------------------------------------
-st.set_page_config(page_title="College Match Planner", layout="wide")
+st.set_page_config(page_title="College Match & ROI Tool", layout="wide")
 
-# ---------------------------------------------------------
-# GLOBAL CSS — BEAUTIFUL LOVABLE-STYLE UI (WITH DROPDOWN FIX)
-# ---------------------------------------------------------
-st.markdown("""
-<style>
+st.title("🎓 College Match & ROI Explorer")
 
-html, body, .block-container {
-    background-color: #ffffff !important;
-    font-family: 'Inter', sans-serif;
-}
+st.write(
+    "Answer the questions below to generate a customized list of colleges "
+    "ranked by similarity to your preferences, along with estimated return on investment."
+)
 
-h1, h2, h3, h4, label, p, div, span {
-    color: #000000 !important;
-}
+# -------------------- FORM UI --------------------
 
-/* Centered Content */
-.center {
-    max-width: 780px;
-    margin-left: auto;
-    margin-right: auto;
-    padding-top: 20px;
-}
+with st.form("user_inputs"):
 
-/* Nice Card */
-.card {
-    background: #ffffff;
-    padding: 32px;
-    border-radius: 22px;
-    border: 1px solid #e5e5e5;
-    margin-top: 35px;
-    box-shadow: 0px 4px 20px rgba(0,0,0,0.06);
-}
+    st.subheader("Basic Preferences")
 
-/* Buttons */
-.stButton > button {
-    width: 100%;
-    background-color: #2563eb !important;
-    color: white !important;
-    border-radius: 12px !important;
-    padding: 14px 18px !important;
-    font-size: 18px !important;
-    border: none !important;
-    transition: 0.2s ease-in-out;
-}
-.stButton > button:hover {
-    background-color: #1d4ed8 !important;
-}
+    state_pref = st.text_input(
+        "Home State (2 letters, optional)",
+        value="CA",
+        help="Used only if you select 'In-State preference'."
+    ).upper()
 
-/* ------------------------------------------------- */
-/*           DROPDOWN / SELECTBOX FIXES              */
-/* ------------------------------------------------- */
-
-/* Main closed selectbox */
-.stSelectbox div[data-baseweb="select"] > div {
-    background-color: #ffffff !important;
-    color: #000000 !important;
-    border-radius: 10px !important;
-    border: 1px solid #cccccc !important;
-}
-
-/* Dropdown menu container */
-.stSelectbox div[data-baseweb="popover"] {
-    background-color: #ffffff !important;
-    border-radius: 10px !important;
-    color: #000000 !important;
-    border: 1px solid #cccccc !important;
-}
-
-/* Dropdown items */
-.stSelectbox ul > li {
-    background-color: #ffffff !important;
-    color: #000000 !important;
-    padding: 8px 14px !important;
-    border-radius: 6px !important;
-}
-
-/* Hovered option */
-.stSelectbox ul > li:hover {
-    background-color: #eff6ff !important;
-    color: #000000 !important;
-}
-
-/* Selected option inside dropdown */
-.stSelectbox ul > li[data-selected="true"] {
-    background-color: #dbeafe !important;
-    color: #000000 !important;
-}
-
-/* Radio buttons text */
-.stRadio div[role="radiogroup"] label {
-    color: black !important;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-# ---------------------------------------------------------
-# PAGE ROUTER (INSTANT)
-# ---------------------------------------------------------
-if "page" not in st.session_state:
-    st.session_state.page = "home"
-
-def goto(page):
-    st.session_state.page = page
-
-
-# ---------------------------------------------------------
-# HOME PAGE
-# ---------------------------------------------------------
-if st.session_state.page == "home":
-
-    st.markdown("<div class='center'>", unsafe_allow_html=True)
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-
-    st.markdown("<h1>🎓 College Match Planner</h1>")
-    st.markdown(
-        "Find your perfect college match based on affordability, academics, and personal preferences."
+    residency_pref = st.selectbox(
+        "Residency preference:",
+        ["in_state", "oos", "any"]
     )
 
-    if st.button("Start Survey →"):
-        goto("survey")
-
-    st.markdown("</div></div>", unsafe_allow_html=True)
-
-
-# ---------------------------------------------------------
-# SURVEY PAGE
-# ---------------------------------------------------------
-elif st.session_state.page == "survey":
-
-    st.markdown("<div class='center'>", unsafe_allow_html=True)
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-
-    # --------- Background Info ---------
-    st.markdown("## 🧑‍🎓 Background Information")
-
-    state_pref = st.selectbox("Preferred State", [
-        "CA","NY","TX","FL","WA","MA","IL","GA","NC","VA","Other"
-    ])
-
-    residency_pref = st.radio(
-        "Residency Preference",
-        {"In-State":"in_state", "Out-of-State":"oos"}
-    )
-
-    family_earnings = st.slider(
-        "Family Annual Earnings", 0, 200000, 60000, step=5000
+    family_earnings = st.number_input(
+        "Estimated Family Income ($)",
+        min_value=0,
+        max_value=500000,
+        step=500,
+        value=60000
     )
 
     desired_degree = st.selectbox(
-        "Minimum Degree Level",
-        list(DEGREE_ORDER.keys())
+        "Highest Degree You Want the College to Offer:",
+        ["non-degree", "associate", "bachelor", "master", "doctoral"]
     )
 
-    st.markdown("---")
+    st.subheader("Soft Preferences (Similarity Model)")
 
-    # --------- Preferences ---------
-    st.markdown("## 🏫 School Preferences")
+    sector = st.selectbox("Preferred Sector:", ["Public", "Private"])
 
-    sector = st.selectbox("School Sector", ["Public","Private","For-Profit"])
-    locality = st.selectbox("Campus Setting", ["City","Suburb","Town","Rural"])
-    preferred_msi = st.selectbox("MSI Preference", ["none"] + MSI_CATEGORIES)
+    locality = st.selectbox("Preferred Campus Setting:", ["City", "Suburb", "Town", "Rural"])
 
-    total_enrollment = st.slider("Enrollment Size Preference", 1000, 60000, 15000)
-    admit_rate = st.slider("Target Admit Rate (%)", 1, 100, 50) / 100
-    sfr = st.slider("Preferred Student–Faculty Ratio", 5, 25, 12)
+    preferred_msi = st.selectbox(
+        "Preferred Minority Serving Institution Type (optional):",
+        ["none"] + MSI_CATEGORIES
+    )
 
-    st.markdown("---")
+    st.write("Rate how strongly each preference matters (1 = small effect, 5 = very important):")
 
-    # --------- Weights ---------
-    st.markdown("## ⚖️ Importance Ratings (1 = Low, 5 = High)")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        w_sector = st.slider("Sector Weight", 1, 5, 3)
+        w_locality = st.slider("Locality Weight", 1, 5, 4)
+        w_msi = st.slider("MSI Weight", 1, 5, 3)
+    with col2:
+        w_enrollment = st.slider("Enrollment Size Weight", 1, 5, 4)
+        w_admit_rate = st.slider("Selectivity Weight (Admit Rate)", 1, 5, 4)
+        w_ratio = st.slider("Student-Faculty Ratio Weight", 1, 5, 3)
 
-    w_sector = st.slider("Sector Importance", 1, 5, 3)
-    w_locality = st.slider("Campus Setting Importance", 1, 5, 3)
-    w_msi = st.slider("MSI Importance", 1, 5, 2)
-    w_enroll = st.slider("Enrollment Size Importance", 1, 5, 3)
-    w_admit = st.slider("Admit Rate Importance", 1, 5, 3)
-    w_sfr = st.slider("Student–Faculty Ratio Importance", 1, 5, 3)
+    # 🧮 Submit
+    submitted = st.form_submit_button("Find My Colleges ✨")
 
-    # --------- Submit Survey ---------
-    if st.button("See Results →"):
-        st.session_state.survey = {
-            "state_pref": state_pref,
-            "residency_pref": residency_pref,
-            "family_earnings": family_earnings,
-            "desired_degree": desired_degree,
-            "user_prefs": {
-                "sector": sector,
-                "locality": locality,
-                "preferred_msi": None if preferred_msi=="none" else preferred_msi,
-                "total_enrollment": total_enrollment,
-                "admit_rate": admit_rate,
-                "student_faculty_ratio": sfr
-            },
-            "user_weights": {
-                "sector": w_sector,
-                "locality": w_locality,
-                "msi": w_msi,
-                "total_enrollment": w_enroll,
-                "admit_rate": w_admit,
-                "student_faculty_ratio": w_sfr
-            }
+# -------------------- PROCESSING --------------------
+
+if submitted:
+    with st.spinner("Generating personalized matches..."):
+
+        user_prefs = {
+            "sector": sector,
+            "locality": locality,
+            "preferred_msi": preferred_msi if preferred_msi != "none" else None,
+            "total_enrollment": 30000,  # could later expose as UI
+            "admit_rate": 0.20,
+            "student_faculty_ratio": 5
         }
-        goto("results")
 
-    st.markdown("</div></div>", unsafe_allow_html=True)
+        user_weights = {
+            "sector": w_sector,
+            "locality": w_locality,
+            "msi": w_msi,
+            "total_enrollment": w_enrollment,
+            "admit_rate": w_admit_rate,
+            "student_faculty_ratio": w_ratio
+        }
 
-
-# ---------------------------------------------------------
-# RESULTS PAGE
-# ---------------------------------------------------------
-elif st.session_state.page == "results":
-
-    st.markdown("<div class='center'>", unsafe_allow_html=True)
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-
-    st.markdown("## 🎯 Your College Matches")
-
-    s = st.session_state.survey
-
-    try:
-        results = build_pipeline(
-            s["state_pref"],
-            s["residency_pref"],
-            s["family_earnings"],
-            s["desired_degree"],
-            s["user_prefs"],
-            s["user_weights"]
+        ranked_df = build_pipeline(
+            state_pref,
+            residency_pref,
+            family_earnings,
+            desired_degree,
+            user_prefs,
+            user_weights
         )
 
-        how_many = st.slider("How many colleges to show?", 5, 50, 20)
-        out = display_output(results, how_many)
+        results = display_output(ranked_df)
 
-        st.dataframe(out, use_container_width=True)
+    st.success("Done! Scroll below to view your ranked colleges.")
 
-    except Exception as e:
-        st.error(f"Error generating results: {e}")
+    st.subheader("📊 Recommended Colleges")
 
-    if st.button("← Back to Home"):
-        goto("home")
+    st.dataframe(results, use_container_width=True)
 
-    st.markdown("</div></div>", unsafe_allow_html=True)
+    # ---- Download Option ----
+    csv = results.to_csv(index=False)
+    st.download_button(
+        label="Download Results as CSV",
+        data=csv,
+        file_name="college_matches.csv",
+        mime="text/csv"
+    )
+
+
+# -------------------- FOOTER --------------------
+st.markdown("---")
+st.caption("Built with ❤️ using Streamlit and your college analytics engine.")
