@@ -15,16 +15,14 @@ st.write(
     "ranked by similarity to your preferences, along with estimated return on investment."
 )
 
-# -------------------- FORM UI --------------------
-
 with st.form("user_inputs"):
 
-    st.subheader("Basic Preferences")
+    st.subheader("Basic Filters")
 
     state_pref = st.text_input(
-        "Home State (2 letters, optional)",
+        "Home State (optional, 2 letters)",
         value="CA",
-        help="Used only if you select 'In-State preference'."
+        max_chars=2
     ).upper()
 
     residency_pref = st.selectbox(
@@ -33,56 +31,91 @@ with st.form("user_inputs"):
     )
 
     family_earnings = st.number_input(
-        "Estimated Family Income ($)",
+        "Estimated Family Income",
         min_value=0,
         max_value=500000,
-        step=500,
+        step=1000,
         value=60000
     )
 
     desired_degree = st.selectbox(
-        "Highest Degree You Want the College to Offer:",
+        "Minimum degree you want:",
         ["non-degree", "associate", "bachelor", "master", "doctoral"]
     )
 
-    st.subheader("Soft Preferences (Similarity Model)")
 
-    sector = st.selectbox("Preferred Sector:", ["Public", "Private"])
+    st.subheader("Soft Preferences (Similarity Matching)")
 
-    locality = st.selectbox("Preferred Campus Setting:", ["City", "Suburb", "Town", "Rural"])
+    sector = st.selectbox("Which do you lean toward:", ["Public", "Private"])
+
+    locality = st.selectbox("Preferred campus setting:", ["City", "Suburb", "Town", "Rural"])
 
     preferred_msi = st.selectbox(
-        "Preferred Minority Serving Institution Type (optional):",
+        "Any MSI preference?",
         ["none"] + MSI_CATEGORIES
     )
 
-    st.write("Rate how strongly each preference matters (1 = small effect, 5 = very important):")
 
-    col1, col2, col3 = st.columns(3)
-    with col1:
+    st.markdown("#### Numeric Preferences (You choose the target value)")
+
+    colA, colB, colC = st.columns(3)
+
+    with colA:
+        target_enrollment = st.slider(
+            "Ideal enrollment size",
+            min_value=500,
+            max_value=100000,
+            value=30000,
+            step=500
+        )
+
+    with colB:
+        target_acceptance = st.slider(
+            "Ideal acceptance rate (%)",
+            min_value=1,
+            max_value=100,
+            value=20,
+            step=1
+        ) / 100
+
+    with colC:
+        target_ratio = st.slider(
+            "Ideal student–faculty ratio",
+            min_value=3,
+            max_value=60,
+            value=8,
+            step=1
+        )
+
+    st.write("---")
+
+    st.markdown("#### How Much Do These Preferences Matter? (Weights 1–5)")
+
+    colW1, colW2, colW3 = st.columns(3)
+    with colW1:
         w_sector = st.slider("Sector Weight", 1, 5, 3)
         w_locality = st.slider("Locality Weight", 1, 5, 4)
         w_msi = st.slider("MSI Weight", 1, 5, 3)
-    with col2:
-        w_enrollment = st.slider("Enrollment Size Weight", 1, 5, 4)
-        w_admit_rate = st.slider("Selectivity Weight (Admit Rate)", 1, 5, 4)
-        w_ratio = st.slider("Student-Faculty Ratio Weight", 1, 5, 3)
 
-    # 🧮 Submit
+    with colW2:
+        w_enrollment = st.slider("Enrollment Weight", 1, 5, 4)
+        w_acceptance = st.slider("Acceptance Rate Weight", 1, 5, 4)
+        w_ratio = st.slider("Student–Faculty Ratio Weight", 1, 5, 3)
+
     submitted = st.form_submit_button("Find My Colleges ✨")
 
-# -------------------- PROCESSING --------------------
 
 if submitted:
-    with st.spinner("Generating personalized matches..."):
+
+    with st.spinner("Generating personalized match list..."):
 
         user_prefs = {
             "sector": sector,
             "locality": locality,
             "preferred_msi": preferred_msi if preferred_msi != "none" else None,
-            "total_enrollment": 30000,  # could later expose as UI
-            "admit_rate": 0.20,
-            "student_faculty_ratio": 5
+            "total_enrollment": target_enrollment,
+            "admit_rate": target_acceptance,
+            "student_faculty_ratio": target_ratio
         }
 
         user_weights = {
@@ -90,7 +123,7 @@ if submitted:
             "locality": w_locality,
             "msi": w_msi,
             "total_enrollment": w_enrollment,
-            "admit_rate": w_admit_rate,
+            "admit_rate": w_acceptance,
             "student_faculty_ratio": w_ratio
         }
 
@@ -105,22 +138,16 @@ if submitted:
 
         results = display_output(ranked_df)
 
-    st.success("Done! Scroll below to view your ranked colleges.")
+
+    st.success("Done! Your personalized college match results are below.")
 
     st.subheader("📊 Recommended Colleges")
-
     st.dataframe(results, use_container_width=True)
 
-    # ---- Download Option ----
-    csv = results.to_csv(index=False)
+    csv_data = results.to_csv(index=False)
     st.download_button(
-        label="Download Results as CSV",
-        data=csv,
+        label="📁 Download Full Results (CSV)",
+        data=csv_data,
         file_name="college_matches.csv",
         mime="text/csv"
     )
-
-
-# -------------------- FOOTER --------------------
-st.markdown("---")
-st.caption("Built with ❤️ using Streamlit and your college analytics engine.")
