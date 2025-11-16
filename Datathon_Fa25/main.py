@@ -344,28 +344,14 @@ def build_pipeline(state_pref, residency_pref, family_earnings, desired_degree, 
     return ranked
 
 
-def display_output(df, n=None):
+def display_output(df, n=20):
     df = df.copy()
-
     df["msi_type"] = df.apply(
         lambda row: next((cat.upper() for cat in MSI_CATEGORIES if row.get(cat, 0) == 1), "None"),
         axis=1
     )
-
-    df = df.sort_values("roi", ascending=False).reset_index(drop=True)
-
-    # keep raw ROI numeric, but make a formatted column for display only
-    df["roi_formatted"] = df["roi"].apply(
-        lambda x: "Not enough data" if isinstance(x,str) else f"{x:.2f}"
-    )
-
+    df = df.sort_values("similarity_score", ascending=False).reset_index(drop=True)
     df["similarity_score"] = (df["similarity_score"] * 100).round(1).astype(str) + "%"
-
-    cols = [
-        "similarity_score","roi_formatted","institution_name","state","city","msi_type",
-        "coa_in_state","coa_out_state","admissions_url",
-        "total_enrollment","admit_rate"
-    ]
-
-    return df[cols] if n is None else df[cols].head(n)
+    return df[["similarity_score","roi","institution_name","state","city","msi_type","coa_in_state","coa_out_state","admissions_url",
+               "total_enrollment","admit_rate"]].head(n)
 
