@@ -136,13 +136,12 @@ with st.form("user_inputs"):
 
 if submitted:
 
-    st.session_state["results_full"] = results_full
-
     with st.spinner("Generating personalized match list..."):
+
         user_prefs = {
             "sector": sector,
             "locality": locality,
-            "preferred_msi": preferred_msi if preferred_msi != "none" else None,
+            "preferred_msi": preferred_msi if preferred_msi is not None else None,
             "total_enrollment": target_enrollment,
             "admit_rate": target_acceptance,
             "student_faculty_ratio": target_ratio
@@ -166,38 +165,48 @@ if submitted:
             user_weights
         )
 
-        results = display_output(ranked_df)
+        # Full sorted dataset
+        results_full = display_output(ranked_df, n=None)
 
-    results_full = display_output(ranked_df, n=None)
-    
-    st.success("Done! Your personalized college match results are below.")
-    if st.session_state["results_full"] is not None:
-    
-        st.subheader("📊 Recommended Colleges")
-    
-        row_options = ["10", "20", "50", "100", "All"]
-        row_choice = st.selectbox("Show how many rows?", row_options, index=0)
-    
-        if row_choice == "All":
-            results_visible = st.session_state["results_full"]
-        else:
-            results_visible = st.session_state["results_full"].head(int(row_choice))
-    
-        st.dataframe(results_visible, use_container_width=True)
-    
-        st.download_button(
-            label="📁 Download Full Results (CSV)",
-            data=st.session_state["results_full"].to_csv(index=False),
-            file_name="college_matches.csv",
-            mime="text/csv"
-        )
-    
-        st.subheader("📍 Visualizing Your Fit Among Colleges")
-    
-        try:
-            pca_fig = build_pca_plot(ranked_df, user_prefs)
-            st.plotly_chart(pca_fig, use_container_width=True)
-        except Exception:
-            st.warning("⚠️ Not enough data to generate PCA visualization for this result set.")
+        # Store full results in session
+        st.session_state["results_full"] = results_full
+
+        st.success("Done! Your personalized college match results are below.")
+        
+
+# ---- DISPLAY RESULTS IF THEY EXIST ---- #
+
+if st.session_state["results_full"] is not None:
+
+    results_full = st.session_state["results_full"]
+
+    st.subheader("📊 Recommended Colleges")
+
+    row_options = ["10", "20", "50", "100", "All"]
+    row_choice = st.selectbox("Show how many rows?", row_options, index=0)
+
+    if row_choice == "All":
+        results_visible = results_full
     else:
-        st.info("👇 Submit your preferences above to generate results.")
+        results_visible = results_full.head(int(row_choice))
+
+    st.dataframe(results_visible, use_container_width=True)
+
+    st.download_button(
+        label="📁 Download Full Results (CSV)",
+        data=results_full.to_csv(index=False),
+        file_name="college_matches.csv",
+        mime="text/csv"
+    )
+
+    st.subheader("📍 Visualizing Your Fit Among Colleges")
+
+    try:
+        pca_fig = build_pca_plot(ranked_df, user_prefs)
+        st.plotly_chart(pca_fig, use_container_width=True)
+    except Exception:
+        st.warning("⚠️ Not enough data to generate PCA visualization for this result set.")
+
+else:
+    st.info("👇 Submit your preferences above to generate results.")
+
