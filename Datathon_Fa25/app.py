@@ -3,7 +3,8 @@ import pandas as pd
 from main import (
     build_pipeline,
     display_output,
-    MSI_CATEGORIES
+    MSI_CATEGORIES,
+    build_pca_plot
 )
 
 st.set_page_config(page_title="College Match & ROI Tool", layout="wide")
