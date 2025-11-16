@@ -151,3 +151,8 @@ if submitted:
         file_name="college_matches.csv",
         mime="text/csv"
     )
+
+st.subheader("📍 Visualizing Your Fit Among Colleges")
+
+pca_fig = build_pca_plot(ranked_df, user_prefs)
+st.plotly_chart(pca_fig, use_container_width=True)
