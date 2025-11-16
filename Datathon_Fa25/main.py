@@ -353,5 +353,5 @@ def display_output(df, n=20):
     df = df.sort_values("similarity_score", ascending=False).reset_index(drop=True)
     df["similarity_score"] = (df["similarity_score"] * 100).round(1).astype(str) + "%"
     return df[["similarity_score","roi","institution_name","state","city","msi_type","coa_in_state","coa_out_state","admissions_url",
-               "total_enrollment","admit_rate"]].head(n)
+               "total_enrollment","admit_rate"]]
 
