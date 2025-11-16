@@ -9,27 +9,55 @@ from main import (
 
 st.set_page_config(page_title="College Match & ROI Tool", layout="wide")
 
+# ---------------- MAPPINGS ---------------- #
+
+STATE_LIST = sorted([
+    "AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS",
+    "KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY",
+    "NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV",
+    "WI","WY"
+])
+
+RES_MAPPING = {
+    "In-State Tuition Only": "in_state",
+    "Out-of-State Tuition Only": "oos",
+    "No Preference": "any"
+}
+
+MSI_LABELS = {
+    "None": None,
+    "Historically Black College/University (HBCU)": "hbcu",
+    "Asian American & Native American Pacific Islander Serving Institution (AANAPISI)": "aanapii",
+    "Native American Non-Tribal Institution (NANTI)": "nanti",
+    "Hispanic Serving Institution (HSI)": "hsi",
+    "Tribal College/University": "tribal",
+    "Predominantly Black Institution (PBI)": "pbi",
+    "Alaska Native / Native Hawaiian Serving Institution (ANNHI)": "annhi"
+}
+
+# ---------------- UI ---------------- #
+
 st.title("🎓 College Match & ROI Explorer")
 
 st.write(
-    "Answer the questions below to generate a customized list of colleges "
-    "ranked by similarity to your preferences, along with estimated return on investment."
+    "Answer the questions below to generate a customized list of colleges ranked by similarity to your preferences."
 )
 
 with st.form("user_inputs"):
 
     st.subheader("Basic Filters")
 
-    state_pref = st.text_input(
-        "Home State (optional, 2 letters)",
-        value="CA",
-        max_chars=2
-    ).upper()
-
-    residency_pref = st.selectbox(
-        "Residency preference:",
-        ["in_state", "oos", "any"]
+    state_pref = st.selectbox(
+        "Select your home state",
+        options=STATE_LIST,
+        index=STATE_LIST.index("CA")
     )
+
+    residency_display = st.selectbox(
+        "Residency preference:",
+        list(RES_MAPPING.keys())
+    )
+    residency_pref = RES_MAPPING[residency_display]
 
     family_earnings = st.number_input(
         "Estimated Family Income",
@@ -44,18 +72,17 @@ with st.form("user_inputs"):
         ["non-degree", "associate", "bachelor", "master", "doctoral"]
     )
 
-
     st.subheader("Soft Preferences (Similarity Matching)")
 
-    sector = st.selectbox("Which do you lean toward:", ["Public", "Private"])
+    sector = st.selectbox("Preference:", ["Public", "Private"])
 
     locality = st.selectbox("Preferred campus setting:", ["City", "Suburb", "Town", "Rural"])
 
-    preferred_msi = st.selectbox(
-        "Any MSI preference?",
-        ["none"] + MSI_CATEGORIES
+    msi_display = st.selectbox(
+        "Do you prefer a federally designated minority-serving institution?",
+        list(MSI_LABELS.keys())
     )
-
+    preferred_msi = MSI_LABELS[msi_display]
 
     st.markdown("#### Numeric Preferences (You choose the target value)")
 
@@ -90,7 +117,7 @@ with st.form("user_inputs"):
 
     st.write("---")
 
-    st.markdown("#### How Much Do These Preferences Matter? (Weights 1–5)")
+    st.markdown("#### Weight How Much These Preferences Matter (1–5)")
 
     colW1, colW2, colW3 = st.columns(3)
     with colW1:
@@ -104,7 +131,6 @@ with st.form("user_inputs"):
         w_ratio = st.slider("Student–Faculty Ratio Weight", 1, 5, 3)
 
     submitted = st.form_submit_button("Find My Colleges ✨")
-
 
 if submitted:
 
