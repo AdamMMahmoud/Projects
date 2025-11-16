@@ -121,9 +121,9 @@ with st.form("user_inputs"):
 
     colW1, colW2, colW3 = st.columns(3)
     with colW1:
-        w_sector = st.slider("Sector Weight", 1, 5, 3)
-        w_locality = st.slider("Locality Weight", 1, 5, 4)
-        w_msi = st.slider("MSI Weight", 1, 5, 3)
+        w_sector = st.slider("Institution Type Weight", 1, 5, 3)
+        w_locality = st.slider("Campus Setting Weight", 1, 5, 4)
+        w_msi = st.slider("Minority Serving Institution Weight", 1, 5, 3)
 
     with colW2:
         w_enrollment = st.slider("Enrollment Weight", 1, 5, 4)
