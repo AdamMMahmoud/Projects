@@ -3,8 +3,8 @@ import pandas as pd
 import numpy as np
 import re
 
-res_path = "data/College_Results.csv"
-aff_path = "data/Affordability_Gap.csv"
+res_path = "Datathon_Fa25/data/College_Results.csv"
+aff_path = "Datathon_Fa25/data/Affordability_Gap.csv"
 
 aff_tbl = [
     "Unit ID", "Student Family Earnings Ceiling", "State Abbreviation", "City", "Sector Name", "Degree of Localization Name",
