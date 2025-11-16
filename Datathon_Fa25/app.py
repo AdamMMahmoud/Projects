@@ -37,7 +37,7 @@ MSI_LABELS = {
 
 # ---------------- UI ---------------- #
 
-st.title("🎓 College Match & ROI Explorer")
+st.title("College Match & ROI Explorer")
 
 st.write(
     "Answer the questions below to generate a customized list of colleges ranked by similarity to your preferences."
@@ -166,7 +166,7 @@ if submitted:
 
     st.success("Done! Your personalized college match results are below.")
 
-    st.subheader("📊 Recommended Colleges")
+    st.subheader("Recommended Colleges")
     st.data_editor(
         results,
         use_container_width=True,
@@ -181,10 +181,10 @@ if submitted:
         mime="text/csv"
     )
 
-    st.subheader("📍 Visualizing Your Fit Among Colleges")
+    st.subheader("Visualizing Your Fit Among Colleges")
 
     try:
         pca_fig = build_pca_plot(ranked_df, user_prefs)
         st.plotly_chart(pca_fig, use_container_width=True)
     except Exception:
-        st.warning("⚠️ Not enough data to generate PCA visualization for this result set.")
+        st.warning("Not enough data to generate PCA visualization for this result set.")
