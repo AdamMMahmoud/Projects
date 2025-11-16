@@ -130,7 +130,7 @@ with st.form("user_inputs"):
         w_acceptance = st.slider("Acceptance Rate Weight", 1, 5, 4)
         w_ratio = st.slider("Student–Faculty Ratio Weight", 1, 5, 3)
 
-    submitted = st.form_submit_button("Find My Colleges ✨")
+    submitted = st.form_submit_button("Find My Colleges")
 
 if submitted:
 
