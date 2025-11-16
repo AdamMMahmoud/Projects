@@ -352,16 +352,20 @@ def display_output(df, n=None):
         axis=1
     )
 
-    # format similarity as %
-    df["similarity_score"] = (df["similarity_score"] * 100).round(1).astype(str) + "%"
-
-    # sort by ROI descending
     df = df.sort_values("roi", ascending=False).reset_index(drop=True)
 
+    # keep raw ROI numeric, but make a formatted column for display only
+    df["roi_formatted"] = df["roi"].apply(
+        lambda x: "Not enough data" if isinstance(x,str) else f"{x:.2f}"
+    )
+
+    df["similarity_score"] = (df["similarity_score"] * 100).round(1).astype(str) + "%"
+
     cols = [
-        "similarity_score","roi","institution_name","state","city","msi_type",
+        "similarity_score","roi_formatted","institution_name","state","city","msi_type",
         "coa_in_state","coa_out_state","admissions_url",
         "total_enrollment","admit_rate"
     ]
 
     return df[cols] if n is None else df[cols].head(n)
+
