@@ -167,8 +167,13 @@ if submitted:
     st.success("Done! Your personalized college match results are below.")
 
     st.subheader("📊 Recommended Colleges")
-    st.dataframe(results, use_container_width=True)
-
+    st.data_editor(
+        results,
+        use_container_width=True,
+        hide_index=True,
+        disabled=True,  # prevents editing
+        num_rows="dynamic"
+    )
     csv_data = results.to_csv(index=False)
     st.download_button(
         label="📁 Download Full Results (CSV)",
