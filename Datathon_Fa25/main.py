@@ -157,13 +157,25 @@ def filter_schools(df, state_pref, residency_pref, family_earnings, desired_degr
         out = out[out["state"] != state_pref]
 
     if family_earnings is not None:
+    
+        # Case 1: Income fits inside documented bin
         matches = out[
             (out["family_earn_low"].notna()) &
             (out["family_earn_low"] <= family_earnings) &
             (family_earnings <= out["family_earn_high"])
         ]
-        catch_all = out[out["family_earn_low"].isna() & out["family_earn_high"].isna()]
-        out = pd.concat([matches, catch_all], ignore_index=True)
+    
+        # Case 2: Income exceeds documented bins → keep highest bin per school
+        if matches.empty:
+            highest_rows = (
+                out[out["family_earn_low"].notna()]
+                .sort_values(["unitid", "family_earn_low"], ascending=[True, False])
+                .drop_duplicates("unitid")
+            )
+            out = highest_rows
+        else:
+            catch_all = out[out["family_earn_low"].isna() & out["family_earn_high"].isna()]
+            out = pd.concat([matches, catch_all], ignore_index=True)
 
     if desired_degree is not None:
         lvl = DEGREE_ORDER.get(desired_degree, -1)
