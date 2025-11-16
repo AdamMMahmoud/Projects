@@ -171,8 +171,7 @@ if submitted:
         results,
         use_container_width=True,
         hide_index=True,
-        disabled=True,  # prevents editing
-        num_rows="dynamic"
+        disabled=True
     )
     csv_data = results.to_csv(index=False)
     st.download_button(
