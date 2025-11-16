@@ -109,7 +109,6 @@ with st.form("user_inputs"):
 if submitted:
 
     with st.spinner("Generating personalized match list..."):
-
         user_prefs = {
             "sector": sector,
             "locality": locality,
@@ -139,7 +138,6 @@ if submitted:
 
         results = display_output(ranked_df)
 
-
     st.success("Done! Your personalized college match results are below.")
 
     st.subheader("📊 Recommended Colleges")
@@ -153,7 +151,11 @@ if submitted:
         mime="text/csv"
     )
 
-st.subheader("📍 Visualizing Your Fit Among Colleges")
+    st.subheader("📍 Visualizing Your Fit Among Colleges")
 
-pca_fig = build_pca_plot(ranked_df, user_prefs)
-st.plotly_chart(pca_fig, use_container_width=True)
+    try:
+        pca_fig = build_pca_plot(ranked_df, user_prefs)
+        st.plotly_chart(pca_fig, use_container_width=True)
+    except Exception:
+        st.warning("⚠️ Not enough data to generate PCA visualization for this result set.")
+
