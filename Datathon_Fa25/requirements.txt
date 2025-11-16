@@ -2,6 +2,5 @@ duckdb
 pandas
 numpy
 streamlit
-sklearn.preprocessing
-sklearn.decomposition
-plotly.express
+scikit-learn
+plotly
