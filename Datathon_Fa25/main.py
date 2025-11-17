@@ -157,15 +157,12 @@ def filter_schools(df, state_pref, residency_pref, family_earnings, desired_degr
         out = out[out["state"] != state_pref]
 
     if family_earnings is not None:
-    
-        # Case 1: Income fits inside documented bin
-        matches = out[
+            matches = out[
             (out["family_earn_low"].notna()) &
             (out["family_earn_low"] <= family_earnings) &
             (family_earnings <= out["family_earn_high"])
         ]
     
-        # Case 2: Income exceeds documented bins → keep highest bin per school
         if matches.empty:
             highest_rows = (
                 out[out["family_earn_low"].notna()]
@@ -237,8 +234,8 @@ def compute_school_score(df, user_prefs, user_weights):
 
     out=df.copy()
     out["distance_score"] = scores
-    k = 6   # curvature; 6–10 is good range
-    m = out["distance_score"].median()  # center point
+    k = 6
+    m = out["distance_score"].median() 
     out["similarity_score"] = 1 / (1 + np.exp(k * (out["distance_score"] - m)))
     out = out.drop(columns=["distance_score"])
     return out.sort_values("similarity_score", ascending=False).reset_index(drop=True)
