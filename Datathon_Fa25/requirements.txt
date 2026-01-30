@@ -1,7 +1,7 @@
 duckdb
 pandas
 numpy
-streamlit
 scikit-learn
 plotly
-altair<5
+altair==4.2.2
+streamlit>=1.26.0
