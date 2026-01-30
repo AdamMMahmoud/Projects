@@ -156,11 +156,13 @@ def filter_schools(df, state_pref, residency_pref, family_earnings, desired_degr
     elif residency_pref == "oos":
         out = out[out["state"] != state_pref]
 
+    matches = pd.DataFrame()
+
     if family_earnings is not None:
-            matches = out[
-            (out["family_earn_low"].notna()) &
-            (out["family_earn_low"] <= family_earnings) &
-            (family_earnings <= out["family_earn_high"])
+        matches = out[
+            out["family_earn_low"].notna()
+            & (out["family_earn_low"] <= family_earnings)
+            & (family_earnings <= out["family_earn_high"])
         ]
 
     if matches.empty:
