@@ -19,3 +19,5 @@ https://yqxjovpm9vf3u2phfcdshd.streamlit.app/
 - Visualizes the full college landscape with PCA, showing where the student fits.
 
 ---
+
+#### See main.py for the primary logic and code of the project, and app.py for the website-specific code.
