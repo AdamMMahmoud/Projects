@@ -20,4 +20,4 @@ https://yqxjovpm9vf3u2phfcdshd.streamlit.app/
 
 ---
 
-#### See [main.py](./Datathon_Fa25/main.py) for the primary logic and code of the project, and [app.py](./Datathon_Fa25/app.py) for the website-specific code.
+#### See [main.py](main.py) for the primary logic and code of the project, and [app.py](./app.py) for the website-specific code.
